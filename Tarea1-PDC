@@ -1,0 +1,45 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-advanced-reader.ss" "lang")((modname Tarea1-PDC) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #t #t none #f () #f)))
+(define (createList size lista)
+  (cond ((= 0 size)(list lista))
+              (else (createList (- size 1) (cons 0 lista)))))
+
+(define (createMat size)
+  (cond ((= 0 size)'())
+        (else (createMatAux '() size size))))
+
+
+(define (createMatAux matrix size cant)
+  (cond ((= 0 size)matrix)
+        (else (createMatAux (append (createList cant '()) matrix) (- size 1) cant))))
+
+(define (solve size x y num move)
+  (cond((= (* size size) num) 1)
+       (else 
+
+
+  )
+
+(define (nextX x move)
+  (cond ((= 0 move)(+ 1 x))
+        ((= 1 move)(+ 2 x))
+        ((= 2 move)(+ 2 x))
+        ((= 3 move)(+ 1 x))
+        ((= 4 move)(- 1 x))
+        ((= 5 move)(- 2 x))
+        ((= 6 move)(- 2 x))
+        ((= 7 move)(- 1 x))
+
+  ))
+
+(define (nextY y move)
+  (cond ((= 0 move)(- 2 y))
+        ((= 1 move)(- 1 y))
+        ((= 2 move)(+ 1 y))
+        ((= 3 move)(+ 2 y))
+        ((= 4 move)(+ 2 y))
+        ((= 5 move)(+ 1 y))
+        ((= 6 move)(- 1 y))
+        ((= 7 move)(- 2 y))
+  ))
