@@ -1,45 +1,47 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
 #reader(lib "htdp-advanced-reader.ss" "lang")((modname Tarea1-PDC) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #t #t none #f () #f)))
-(define (createList size lista)
+;Funcion encargada de crear una lista con valores de 0
+(define (creaList size lista)
   (cond ((= 0 size)(list lista))
-              (else (createList (- size 1) (cons 0 lista)))))
+              (else (creaList (- size 1) (cons 0 lista)))))
 
-(define (createMat size)
+;Funcion encargada de crear una matriz con valores de 0
+(define (creaMat size)
   (cond ((= 0 size)'())
-        (else (createMatAux '() size size))))
+        (else (creaMatAux '() size size))))
 
-
-(define (createMatAux matrix size cant)
+;Funcion auxiliar que crea la matriz
+(define (creaMatAux matrix size cant)
   (cond ((= 0 size)matrix)
-        (else (createMatAux (append (createList cant '()) matrix) (- size 1) cant))))
-
-(define (solve size x y num move)
-  (cond((= (* size size) num) 1)
-       (else 
+        (else (createMatAux (append (creaList cant '()) matrix) (- size 1) cant))))
 
 
-  )
+;Funcion que modifica el valor de una casilla en la matris
+(define (cambiaVal mat x y value)(
+  cond ((null? mat) '())
+       (else (cambiaAux mat x y '() value))))
 
-(define (nextX x move)
-  (cond ((= 0 move)(+ 1 x))
-        ((= 1 move)(+ 2 x))
-        ((= 2 move)(+ 2 x))
-        ((= 3 move)(+ 1 x))
-        ((= 4 move)(- 1 x))
-        ((= 5 move)(- 2 x))
-        ((= 6 move)(- 2 x))
-        ((= 7 move)(- 1 x))
+;Funcion auxiliar para modificar valores en una matris
+(define (cambiaAux mat x y res value)(
+  cond ((not (equal? x 0)) (cambiaAux (cdr mat) (- x 1) y (
+         append res (list (car mat))) value))
+       ((and (equal? x 0) (not (equal? y 0))) (append (append res (
+         list (susti value y (car mat) '()))) (cdr mat)))
+       (else (append (list (susti value y (car mat) '())) (cdr mat)))))
 
-  ))
+;Funcion que modifica un valor en una lista
+(define (susti value pos lista res)(
+  cond ((equal? pos 0) (append res (append (list value) (cdr lista))))
+       (else (susti value (- pos 1) (cdr lista) (append res (list (car lista)))))))
 
-(define (nextY y move)
-  (cond ((= 0 move)(- 2 y))
-        ((= 1 move)(- 1 y))
-        ((= 2 move)(+ 1 y))
-        ((= 3 move)(+ 2 y))
-        ((= 4 move)(+ 2 y))
-        ((= 5 move)(+ 1 y))
-        ((= 6 move)(- 1 y))
-        ((= 7 move)(- 2 y))
-  ))
+;Funcion que obtiene el valor de una lista
+(define (obtVal mat x y)(
+  cond ((not (equal? x 0)) (obtVal (cdr mat) (- x 1) y))
+       ((and (equal? x 0) (not (equal? y 0))) (obtAux y (car mat)))
+       (else (caar mat))))
+
+;Funcion auxiliar para obtener el valor
+(define (obtAux pos lista)(
+  cond ((equal? pos 0) (car lista))
+       (else (obtAux (- pos 1) (cdr lista)))))
