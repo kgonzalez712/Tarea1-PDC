@@ -43,6 +43,11 @@
         (else (getindexAux list (- i 1) (cdr a) ir)))
   )
 
+(define (isvalid? x y N matrix)
+  (cond((and (and (and (<= 0 x) (< x N)) (and(<= 0 y) (< y N))) (equal? (getindex(getindex matrix x) y) 0)) #t)
+       (else #f)
+       )
+  )
 
 (define (moves n)
   '((-2 -1) (-2 1) (-1 -2) (-1 2) (1 -2) (1 2) (2 -1) (2 1))
@@ -61,42 +66,12 @@
   (getpAux mat ele size 0 '()))
 
 (define (getpAux list ele size j pos)
-  (cond ((not(equal? (getele (car list) ele) -1)) (cons j (cons (getele (car list) ele) pos)))
+  (cond ((equal? j size) -1)
+    ((not(equal? (getele (car list) ele) -1)) (cons j (cons (getele (car list) ele) pos)))
         ((equal? (car list) '()) -1)
         (else (getpAux (cdr list) ele size (+ j 1) pos)))
   )
-
-;__________________________ Caballo ____________________________________________
-;(define (PDC-Todas size pos)
-  ;(cond())
-;  )
-
-(define (solve size matrix step i j movimientos n li)
-  (cond((equal? step (* size size)) matrix)
-       (else (myFor step size matrix i j movimientos 8 n li))
-       )
-  )
-(define (myFor step size matrix x y sol n i li)
-  (cond((equal? n 0) matrix)
-       (else (myForAux step size (setVal matrix x y step) x y sol 8 i li))))
-
-(define (myForAux step size matrix x y sol n i li)
-  (cond ((equal? 8 i) (solve size (setVal matrix x  y 0) (- step 1)   (car (getpos matrix (- step 1) size)) (car (cdr(getpos matrix (- step 1) size))) sol (+ (car (cdr li)) 1) (cdr li)))
-
-    ((isvalid? (+ x (getindex (getindex sol i) 0)) (+ y (getindex (getindex sol i) 1)) size matrix)
-        (solve size (setVal matrix (+ x (getindex (getindex sol i) 0)) (+ y (getindex (getindex sol i) 1)) step) (+ step 1) (+ x (getindex (getindex sol i) 0))
-               (+ y (getindex (getindex sol i) 1)) sol 0 (cons i li)))
-       
-       (else (myForAux step size matrix x y sol 8 (+ i 1) li))))
-
-
-
-(define (isvalid? x y N matrix)
-  (cond((and (and (and (<= 0 x) (< x N)) (and(<= 0 y) (< y N))) (equal? (getindex(getindex matrix x) y) 0)) #t)
-       (else #f)
-       )
-  )
-
+;Validar la ruta dada
 (define (isval? x x1 y y1)
   (cond ((checks (- x x1) (- y y1)) #t)
        (else #f)
@@ -109,9 +84,27 @@
        )
   )
 
-(define (PDC-Test N sol)
-  (Testsol sol '() 1 N)
+;Funciones para buscar una solucion
+(define (solve size matrix step i j movimientos n li)
+  (cond((equal? step (* size size)) matrix)
+       (else (myFor step size matrix i j movimientos 8 n li))
+       )
   )
+;Funciones para Backtracking(se encicla)
+(define (myFor step size matrix x y sol n i li)
+  (cond((equal? n 0) matrix)
+       (else (myForAux step size (setVal matrix x y step) x y sol 8 i li))))
+
+(define (myForAux step size matrix x y sol n i li)
+  ;(cond ((equal? 8 i) (solve size (setVal matrix x  y 0) (- step 1)   (car (getpos matrix (- step 1) size)) (car (cdr(getpos matrix (- step 1) size))) sol (+ (car (cdr li)) 1) (cdr li)))
+    (cond ((equal? 8 i) matrix)
+    ((isvalid? (+ x (getindex (getindex sol i) 0)) (+ y (getindex (getindex sol i) 1)) size matrix)
+        (solve size (setVal matrix (+ x (getindex (getindex sol i) 0)) (+ y (getindex (getindex sol i) 1)) step) (+ step 1) (+ x (getindex (getindex sol i) 0))
+               (+ y (getindex (getindex sol i) 1)) sol 0 (cons i li)))
+       
+       (else (myForAux step size matrix x y sol 8 (+ i 1) li))))
+
+;Auxiliar de la funcion que prueba ruta
 (define (Testsol sol mat i N)
   (cond ((equal? i (* N N)) (append mat(list(cons (car(getpos sol i N)) (cons (car(cdr(getpos sol i N))) '()))) ))
          ((isval? (car(getpos sol i N)) (car(getpos sol (+ i 1) N)) (car(cdr(getpos sol i N))) (car(cdr(getpos sol (+ i 1) N))))
@@ -120,5 +113,16 @@
   )
 
 
+;__________________________ Caballo ____________________________________________
+(define (PDC-sol size pos)
+  (solve size (createMat size) 1 (car pos) (car(cdr pos)) (moves 8) 0 '(0))
+)
 
-(solve 5 (createMat 5) 1 2 2 (moves 8) 0 '(0))
+(define (PDC-Test N sol)
+  (Testsol sol '() 1 N)
+  )
+
+
+
+
+
