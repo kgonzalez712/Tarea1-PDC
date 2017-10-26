@@ -44,6 +44,28 @@
   )
 
 
+(define (moves n)
+  '((-2 -1) (-2 1) (-1 -2) (-1 2) (1 -2) (1 2) (2 -1) (2 1))
+  )
+
+(define (getele list ele)
+  (getAux list ele 0)
+  )
+(define (getAux list ele i)
+  (cond ((equal? list '()) -1)
+        ((equal? (car list) ele) i)
+        (else (getAux (cdr list) ele (+ i 1))))
+  )
+
+(define (getpos mat ele size)
+  (getpAux mat ele size 0 '()))
+
+(define (getpAux list ele size j pos)
+  (cond ((not(equal? (getele (car list) ele) -1)) (cons j (cons (getele (car list) ele) pos)))
+        ((equal? (car list) '()) -1)
+        (else (getpAux (cdr list) ele size (+ j 1) pos)))
+  )
+
 ;__________________________ Caballo ____________________________________________
 ;(define (PDC-Todas size pos)
   ;(cond())
@@ -75,27 +97,28 @@
        )
   )
 
-(define (moves n)
-  '((-2 -1) (-2 1) (-1 -2) (-1 2) (1 -2) (1 2) (2 -1) (2 1))
+(define (isval? x x1 y y1)
+  (cond ((checks (- x x1) (- y y1)) #t)
+       (else #f)
+       )
   )
 
-(define (getele list ele)
-  (getAux list ele 0)
-  )
-(define (getAux list ele i)
-  (cond ((equal? list '()) -1)
-        ((equal? (car list) ele) i)
-        (else (getAux (cdr list) ele (+ i 1))))
+(define (checks a b)
+  (cond ((not(equal? (getele (moves 8) (cons a (cons b '()))) -1)) #t)
+       (else #f)
+       )
   )
 
-(define (getpos mat ele size)
-  (getpAux mat ele size 0 '()))
-
-(define (getpAux list ele size j pos)
-  (cond ((not(equal? (getele (car list) ele) -1)) (cons j (cons (getele (car list) ele) pos)))
-        ((equal? (car list) '()) -1)
-        (else (getpAux (cdr list) ele size (+ j 1) pos)))
+(define (PDC-Test N sol)
+  (Testsol sol '() 1 N)
   )
+(define (Testsol sol mat i N)
+  (cond ((equal? i (* N N)) (append mat(list(cons (car(getpos sol i N)) (cons (car(cdr(getpos sol i N))) '()))) ))
+         ((isval? (car(getpos sol i N)) (car(getpos sol (+ i 1) N)) (car(cdr(getpos sol i N))) (car(cdr(getpos sol (+ i 1) N))))
+          (Testsol sol (append mat(list(cons (car(getpos sol i N)) (cons (car(cdr(getpos sol i N))) '()))) ) (+ i 1) N))
+         (else #f))
+  )
+
 
 
 (solve 5 (createMat 5) 1 2 2 (moves 8) 0 '(0))
