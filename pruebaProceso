@@ -44,22 +44,17 @@
 )
 
 (define (PDC-sol1 size x y mat m)
-  (cond ((or(or(or (< 0 x ) (>= x size )) (>= x size )) (not(equal? (getindex (getindex mat x) y) 0)) )  #f)
+  (cond ((and (or(or(or (> 0 x ) (> x size )) (> y size )) (> 0 size )) (not(equal? (getindex (getindex mat x) y) 0)) )  #f)
   (else (PDC-Aux size (setVal mat x y m) x y m)))
 )
 
 (define (PDC-Aux size  mat x y m)
   (cond ((equal? m (* size size)) #t)
-        (else (validate size x y mat m))
-        )
-)
-
-(define (validate size x y mat m)
-  (cond ((or(or(or(or(or(or((PDC-sol1 size (+ x 2) (+ y 1) mat (+ m 1)) (PDC-sol1 size (+ x 2) (- y 1) mat (+ m 1)) )
-              (PDC-sol1 size (- x 2) (+ y 1) mat (+ m 1)))  (PDC-sol1 size (- x 2) (- y 1) mat (+ m 1))  ) (PDC-sol1 size (+ x 1) (+ y 1) mat (+ m 1)))
-        ((PDC-sol1 size (+ x 1) (- y 1) mat (+ m 1))) ) (PDC-sol1 size (- x 1) (+ y 1) mat (+ m 1))) (PDC-sol1 size (- x 1) (- y 1) mat (+ m 1))) #t)
+        ( (or (or (or (or(or(or (or (PDC-sol1 size (+ x 2) (+ y 1) mat (+ m 1)) (PDC-sol1 size (+ x 2) (- y 1) mat (+ m 1))) (PDC-sol1 size (- x 2) (+ y 1) mat (+ m 1)))
+            (PDC-sol1 size (- x 2) (- y 1) mat (+ m 1)) )(PDC-sol1 size (+ x 1) (+ y 1) mat (+ m 1))) (PDC-sol1 size (+ x 1) (- y 1) mat (+ m 1))) (PDC-sol1 size (- x 1) (+ y 1) mat (+ m 1))) (PDC-sol1 size (- x 1) (- y 1) mat (+ m 1))) mat)
         (else #f)
         )
 )
+
 
 (PDC-sol 5 0 0 1)
