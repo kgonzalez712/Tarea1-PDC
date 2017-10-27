@@ -1,47 +1,190 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-advanced-reader.ss" "lang")((modname Tarea1-PDC) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #t #t none #f () #f)))
-;Funcion encargada de crear una lista con valores de 0
-(define (creaList size lista)
-  (cond ((= 0 size)(list lista))
-              (else (creaList (- size 1) (cons 0 lista)))))
+#reader(lib "htdp-advanced-reader.ss" "lang")((modname Tarea1-PDC) (read-case-sensitive #t) (teachpacks ((lib "gui.rkt" "teachpack" "htdp"))) (htdp-settings #(#t constructor repeating-decimal #t #t none #f ((lib "gui.rkt" "teachpack" "htdp")) #f)))
+;_______________________________PDC-Sol____________________________________________________________
 
-;Funcion encargada de crear una matriz con valores de 0
-(define (creaMat size)
-  (cond ((= 0 size)'())
-        (else (creaMatAux '() size size))))
+; Función que crea la Matriz
+(define (createMat size)
+  (cond ((equal? size 1) '(0))
+       (else (createMatAux size size '()))))
 
-;Funcion auxiliar que crea la matriz
-(define (creaMatAux matrix size cant)
-  (cond ((= 0 size)matrix)
-        (else (createMatAux (append (creaList cant '()) matrix) (- size 1) cant))))
+; Funcion auxiliar para crear la matriz
+(define (createMatAux size cont res)
+  (cond ((equal? cont 0) res)
+       (else (createMatAux size (- cont 1) (append res (list(createList size '())) )))))
+
+; Funcion que crea la una lista llena de 0s
+(define (createList size rList)
+  (cond ((equal? size 0) rList)
+       (else (createList (- size 1) (append rList (list 0))))))
 
 
 ;Funcion que modifica el valor de una casilla en la matris
-(define (cambiaVal mat x y value)(
-  cond ((null? mat) '())
-       (else (cambiaAux mat x y '() value))))
+(define (change_Value matrix row col value)
+  (cond ((null? matrix) '())
+        (else (changer_Aux matrix row col '() value))))
 
-;Funcion auxiliar para modificar valores en una matris
-(define (cambiaAux mat x y res value)(
-  cond ((not (equal? x 0)) (cambiaAux (cdr mat) (- x 1) y (
-         append res (list (car mat))) value))
-       ((and (equal? x 0) (not (equal? y 0))) (append (append res (
-         list (susti value y (car mat) '()))) (cdr mat)))
-       (else (append (list (susti value y (car mat) '())) (cdr mat)))))
+;Funcion auxiliar que permite modificar valores en una matris
+(define (changer_Aux matrix row col res value)(
+  cond ((not (equal? row 0)) (changer_Aux (cdr matrix) (- row 1) col (append res (list (car matrix))) value)) ((and (equal? row 0) (not (equal? col 0))) (append (append res (list (sust value col (car matrix) '()))) (cdr matrix)))
+       (else (append (append res (list (sust value col (car matrix) '()))) (cdr matrix)))))
 
 ;Funcion que modifica un valor en una lista
-(define (susti value pos lista res)(
-  cond ((equal? pos 0) (append res (append (list value) (cdr lista))))
-       (else (susti value (- pos 1) (cdr lista) (append res (list (car lista)))))))
+(define (sust value pos lista res)
+  (cond ((equal? pos 0) (append res (append (list value) (cdr lista))))
+        (else (sust value (- pos 1) (cdr lista) (append res (list (car lista)))))))
 
 ;Funcion que obtiene el valor de una lista
-(define (obtVal mat x y)(
-  cond ((not (equal? x 0)) (obtVal (cdr mat) (- x 1) y))
-       ((and (equal? x 0) (not (equal? y 0))) (obtAux y (car mat)))
-       (else (caar mat))))
+(define (get_Val matrix row col)(
+  cond ((not (equal? row 0)) (get_Val (cdr matrix) (- row 1) col)) ((and (equal? row 0) (not (equal? col 0))) (get_ValAux col (car matrix)))
+       (else (caar matrix))))
 
 ;Funcion auxiliar para obtener el valor
-(define (obtAux pos lista)(
+(define (get_ValAux pos lista)(
   cond ((equal? pos 0) (car lista))
-       (else (obtAux (- pos 1) (cdr lista)))))
+       (else (get_ValAux (- pos 1) (cdr lista)))))
+
+;Validar si la poscion es valida
+(define (checkPos matriz row col)
+  (cond ((equal? (checkPos_AUX matriz row col) #t) #t )(else #f )))
+
+;Funcion Auxiliar para validar la posicion
+(define (checkPos_AUX matriz row col)
+  (cond ((and (equal? row 0) (equal? (get_ValAux col (car matriz)) 0)) #t) ((> row 0) (checkPos_AUX (cdr matriz) (- row 1) col))
+        (else #f )))
+
+;Fucion que cuenta el largo de una lista
+(define (lenght lista res)
+  (cond ((null? lista) res)
+        (else (lenght (cdr lista) (+ res 1)))))
+
+;Funcion que permite identificar el ultimo elemento de una lista
+(define (get_last lista) (cond ((null? (cdr lista)) (car lista))
+       (else (get_last (cdr lista)))))
+
+;Funcion auxiliar para eliminar el ultimo elemento
+(define (delLast lista lar)
+  (cond ((equal? lar 1) '())
+       (else (delAux lista lar '()))))
+
+(define (delAux lista lar res)
+  (cond ((equal? lar 1) res)
+        (else (delAux (cdr lista) (- lar 1) (append res (list (car lista)))))))
+
+;Funcion que devuelve una matriz con los posibles movimientos  del caballo
+(define (generateMoves actual moves size step)(
+  cond ((or (>= (car actual) size) (>= (cadr actual) size) (< (car actual) 0)
+    (< (cadr actual) 0)) '())
+       ((>= step size) moves)
+       ((and (equal? step 0) (<= 0 (+ (car actual) 1))
+         (<= 0 (+ (cadr actual) 2)) (< (+ (car actual) 1) size)
+           (< (+ (cadr actual) 2) size)) (generateMoves actual
+             (append moves (list (list (+ (car actual) 1) (+ (cadr actual) 2)))) size (+ step 1)))
+       ((and (equal? step 1) (<= 0 (+ (car actual) 1))
+         (<= 0 (- (cadr actual) 2)) (< (+ (car actual) 1) size)
+           (< (- (cadr actual) 2) size)) (generateMoves actual
+             (append moves (list (list (+ (car actual) 1) (- (cadr actual) 2)))) size (+ step 1)))
+       ((and (equal? step 2) (<= 0 (- (car actual) 1))
+         (<= 0 (+ (cadr actual) 2)) (< (- (car actual) 1) size)
+           (< (+ (cadr actual) 2) size)) (generateMoves actual
+             (append moves (list (list (- (car actual) 1) (+ (cadr actual) 2)))) size (+ step 1)))
+       ((and (equal? step 3) (<= 0 (- (car actual) 1))
+         (<= 0 (- (cadr actual) 2)) (< (- (car actual) 1) size)
+           (< (- (cadr actual) 2) size)) (generateMoves actual
+             (append moves (list (list (- (car actual) 1) (- (cadr actual) 2)))) size (+ step 1)))
+       ((and (equal? step 4) (<= 0 (+ (car actual) 2))
+         (<= 0 (+ (cadr actual) 1)) (< (+ (car actual) 2) size)
+           (< (+ (cadr actual) 1) size)) (generateMoves actual
+             (append moves (list (list (+ (car actual) 2) (+ (cadr actual) 1)))) size (+ step 1)))
+       ((and (equal? step 5) (<= 0 (+ (car actual) 2))
+         (<= 0 (- (cadr actual) 1)) (< (+ (car actual) 2) size)
+           (< (- (cadr actual) 1) size)) (generateMoves actual
+             (append moves (list (list (+ (car actual) 2) (- (cadr actual) 1)))) size (+ step 1))) ;(2 -1)
+       ((and (equal? step 6) (<= 0 (- (car actual) 2))
+         (<= 0 (+ (cadr actual) 1)) (< (- (car actual) 2) size)
+           (< (+ (cadr actual) 1) size)) (generateMoves actual
+             (append moves (list (list (- (car actual) 2) (+ (cadr actual) 1)))) size (+ step 1))) ;(-2 1)
+       ((and (equal? step 7) (<= 0 (- (car actual) 2))
+         (<= 0 (- (cadr actual) 1)) (< (- (car actual) 2) size)
+           (< (- (cadr actual) 1) size)) (generateMoves actual
+             (append moves (list (list (- (car actual) 2) (- (cadr actual) 1)))) size (+ step 1)))
+       (else (generateMoves actual moves size (+ step 1)))))
+
+;Despliega  la matriz
+(define (show table)
+  (write table))
+
+;Funcion que permite encontrar los espacios libres disponibles para el movimiento
+(define (getNeighbors moves neighbors mat pos)
+  (cond ((null? moves) neighbors) ((equal? (checkPos mat (caar moves) (cadar moves)) #t) (getNeighbors (cdr moves) (append neighbors (list(car moves))) mat pos))
+    (else (getNeighbors (cdr moves) neighbors mat pos))))
+
+;Funcion que realiza una heuristica para encontrar un valor optimo sobre movimientos
+(define (getScore neighbors scores matriz size)
+  (cond ((null? neighbors) (car (sortScore scores '())))
+    (else (getScore (cdr neighbors) (append scores (list(append (list(car neighbors)) (list(move_counter (car neighbors) matriz 0)))) ) matriz size))))
+
+
+(define (move_counter pos matriz resultado)
+  (lenght (getNeighbors (generateMoves pos '() 8 0) '() matriz '()) 0))
+
+;Funcion heuristica que ordena los movimiento mas optimo
+(define (sortScore scores res)
+  (cond ((null? scores) res) ((null? res) (sortScore (cdr scores) (car scores))) ((< (cadar scores) (cadr res)) (sortScore (cdr scores) (car scores)))
+    (else (sortScore (cdr scores) res))))
+
+;Funcion que permite obtener el tour del caballo
+(define (KnightsTour move next path pos size table)(
+  cond ((equal? move (- (* size size) 1)) (show (change_Value table (car next) (cadr next) (+ move 1))))(
+    else (KnightsTour (+ move 1) (getScore (getNeighbors (generateMoves next '() size 0) '() table next) '() table next) (append path (list pos)) next size (change_Value table (car next) (cadr next) (+ move 1))))))
+
+;Funcion que permite obtener una ruta posible que sirve como solucion del problema
+(define (PDC-Sol size pos)
+  (KnightsTour 1 (getScore (getNeighbors (generateMoves pos '() size 0) '() (change_Value (createMat size) (car pos) (cadr pos) 1) pos) '() (change_Value (createMat size) (car pos) (cadr pos) 1) size) '() pos size (change_Value (createMat size) (car pos) (cadr pos) 1)))
+
+
+
+ ;________________________________________PDC-test_____________________________________________________________________
+
+
+(define (PDC-Test N sol)
+  (Testsol sol '() 1 N))
+
+(define (Testsol sol mat i N)
+  (cond ((equal? i (* N N)) (append mat(list(cons (car(getpos sol i N)) (cons (car(cdr(getpos sol i N))) '()))) )) ((isval? (car(getpos sol i N)) (car(getpos sol (+ i 1) N)) (car(cdr(getpos sol i N))) (car(cdr(getpos sol (+ i 1) N)))) (Testsol sol (append mat(list(cons (car(getpos sol i N)) (cons (car(cdr(getpos sol i N))) '()))) ) (+ i 1) N))
+        (else #f)))
+
+(define (getpos mat ele size)
+  (getpAux mat ele size 0 '()))
+
+(define (getpAux list ele size j pos)
+  (cond ((equal? j size) -1)
+    ((not(equal? (getele (car list) ele) -1)) (cons j (cons (getele (car list) ele) pos)))
+        ((equal? (car list) '()) -1)
+        (else (getpAux (cdr list) ele size (+ j 1) pos)))
+  )
+
+;Validar la ruta dada
+(define (isval? x x1 y y1)
+  (cond ((checks (- x x1) (- y y1)) #t)
+       (else #f)))
+
+(define (checks a b)
+  (cond ((not(equal? (getele (moves 8) (cons a (cons b '()))) -1)) #t)
+       (else #f)))
+
+(define (getele list ele)
+  (getAux list ele 0))
+
+(define (getAux list ele i)
+  (cond ((equal? list '()) -1)
+        ((equal? (car list) ele) i)
+        (else (getAux (cdr list) ele (+ i 1)))))
+
+(define (moves n)
+  '((-2 -1) (-2 1) (-1 -2) (-1 2) (1 -2) (1 2) (2 -1) (2 1))
+  )
+
+
+;____________________________________PDC-Todas___________________________________________
+
